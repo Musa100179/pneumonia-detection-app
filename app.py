@@ -112,7 +112,7 @@ with col2:
 st.write("---")
 st.caption("Disclaimer: This AI tool is for educational purposes only and is not a substitute for professional medical advice.")
         # THRESHOLD KO 0.40 KAR DIYA HAI (Zyada Pneumonia pakarne ke liye)
-        if prob_pneumonia > 0.40:
+    if prob_pneumonia > 0.40:
             st.warning(f"⚠️ PNEUMONIA DETECTED\nConfidence: {prob_pneumonia*100:.2f}%\nPlease consult a doctor.")
         else:
             st.success(f"✅ NORMAL\nConfidence: {prob_normal*100:.2f}%\nLungs look clear.")

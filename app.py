@@ -36,12 +36,15 @@ eval_tf = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# 3. OOD Check (Irrelevant Image detect karne ke liye)
+# 3. OOD Check (Irrelevant Image detect karne ke liye - Relaxed)
 def is_xray(image):
     img_array = np.array(image.convert('L'))
     std_dev = img_array.std()
     mean_val = img_array.mean()
-    if mean_val > 180 or std_dev < 40: 
+    
+    # Sakhti kam kar di hai taake dark X-rays bhi pass ho jayein
+    # Agar image bohot zyada rangeen hai ya bilkul hi safaid hai, tabhi reject karega
+    if mean_val > 220 or std_dev < 20: 
         return False
     return True
 

@@ -75,13 +75,26 @@ eval_tf = transforms.Compose([
 # ---------------- UPDATED OOD CHECK (Strict) ----------------
 def is_xray(image):
     img_array = np.array(image.convert('L'))
-    std_dev = img_array.std()
-    mean_val = img_array.mean()
     
-    # Strict conditions for X-ray
-    if mean_val < 30 or mean_val > 210:
+    # Check 1: Image ke kinaron (borders) ka average nikalna
+    h, w = img_array.shape
+    border = np.concatenate([
+        img_array[0:10, :].flatten(),    # Top border
+        img_array[-10:, :].flatten(),    # Bottom border
+        img_array[:, 0:10].flatten(),    # Left border
+        img_array[:, -10:].flatten()     # Right border
+    ])
+    
+    # X-ray ke kinare aam tor par bohot dark (kaale) hote hain
+    border_mean = border.mean()
+    
+    # Agar kinare bright hain (jaise poster ya photo mein), toh reject kardo
+    if border_mean > 80: 
         return False
-    if std_dev > 75: 
+        
+    # Check 2: Contrast (X-ray mein contrast thora kam hota hai)
+    std_dev = img_array.std()
+    if std_dev > 80: 
         return False
         
     return True

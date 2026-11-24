@@ -72,12 +72,18 @@ eval_tf = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
+# ---------------- UPDATED OOD CHECK (Strict) ----------------
 def is_xray(image):
     img_array = np.array(image.convert('L'))
     std_dev = img_array.std()
     mean_val = img_array.mean()
-    if mean_val > 220 or std_dev < 20: 
+    
+    # Strict conditions for X-ray
+    if mean_val < 30 or mean_val > 210:
         return False
+    if std_dev > 75: 
+        return False
+        
     return True
 
 # ---------------- 3. UI DESIGN ----------------
@@ -92,7 +98,7 @@ with col1:
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file).convert('RGB')
-        st.image(image, caption="Uploaded X-Ray Image", use_column_width=True)
+        st.image(image, caption="Uploaded X-Ray Image", use_container_width=True)
 
 with col2:
     st.markdown("### 📊 Diagnostic Report")

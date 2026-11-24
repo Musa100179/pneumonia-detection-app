@@ -15,20 +15,16 @@ def build_model(n_classes=2):
 @st.cache_resource
 def load_model():
     model = build_model(2)
-    # Choti (half-precision) file load kar rahe hain
     checkpoint = torch.load("pneumonia_resnet18_small.pth", map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint['state_dict'])
-    
-    # YEH LINE SABSE ZAROORI HAI: Model ko wapis float32 mein convert karne ke liye
     model = model.float() 
-    
     model.eval()
     return model
 
 model = load_model()
 device = torch.device('cpu')
 
-# 2. Transforms (Bilkul Kaggle jaisa)
+# 2. Transforms
 eval_tf = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
     transforms.Resize((224, 224)),
@@ -41,9 +37,6 @@ def is_xray(image):
     img_array = np.array(image.convert('L'))
     std_dev = img_array.std()
     mean_val = img_array.mean()
-    
-    # Sakhti kam kar di hai taake dark X-rays bhi pass ho jayein
-    # Agar image bohot zyada rangeen hai ya bilkul hi safaid hai, tabhi reject karega
     if mean_val > 220 or std_dev < 20: 
         return False
     return True
@@ -68,7 +61,8 @@ if uploaded_file is not None:
         prob_normal = output[0].item()
         prob_pneumonia = output[1].item()
         
-        if prob_pneumonia > 0.5:
+        # THRESHOLD KO 0.40 KAR DIYA HAI (Zyada Pneumonia pakarne ke liye)
+        if prob_pneumonia > 0.40:
             st.warning(f"⚠️ PNEUMONIA DETECTED\nConfidence: {prob_pneumonia*100:.2f}%\nPlease consult a doctor.")
         else:
             st.success(f"✅ NORMAL\nConfidence: {prob_normal*100:.2f}%\nLungs look clear.")
